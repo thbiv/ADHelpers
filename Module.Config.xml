@@ -1,0 +1,33 @@
+<config>
+  <deployment>
+    <repository>ADHelpers</repository>
+    <onlinehelp>
+    </onlinehelp>
+    <filehash>C:\Users\thbarratt\Documents\FileHashData\ADHelpers</filehash>
+    <testresults>C:\Users\thbarratt\Documents\TestResults\ADHelpers</testresults>
+  </deployment>
+  <manifest>
+    <guid>7eb4ec1f-7733-414a-bd6c-bd4994ef594e</guid>
+    <author>Thomas Barratt</author>
+    <moduleversion>2.1.7</moduleversion>
+    <description>Module with functions for ActiveDirectory tasks</description>
+    <copyright>2018-2020 Thomas Barratt</copyright>
+    <projecturi>https://github.com/thbiv/ADHelpers</projecturi>
+    <licenseuri>https://github.com/thbiv/ADHelpers/blob/master/LICENSE</licenseuri>
+    <releasenotes>https://github.com/thbiv/ADHelpers/blob/master/Release-Notes.md</releasenotes>
+    <tags>ADHelpers,ActiveDirectory, Active, Directory, Windows</tags>
+  </manifest>
+  <psrepos>
+    <psrepo>
+      <name>PSLocalGallery</name>
+      <installationpolicy>Trusted</installationpolicy>
+      <sourcelocation>C:\ProgramData\PSLocaLGallery\Repository</sourcelocation>
+    </psrepo>
+  </psrepos>
+  <requiredmodules>
+    <module name="InvokeBuild" repository="PSGallery" />
+    <module name="Pester" repository="PSGallery" requiredversion="4.10.1" />
+    <module name="PSScriptAnalyzer" repository="PSGallery" />
+    <module name="platyPS" repository="PSGallery" />
+  </requiredmodules>
+</config>

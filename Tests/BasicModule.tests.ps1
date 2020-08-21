@@ -27,10 +27,27 @@ Describe "Powershell validation" {
     }
 }
 
-Describe 'Basic Module Tests' {
-	Context 'Module Import Test' {
-		It 'Confirms Module is Loaded' {
-			(Get-Module $ModuleName) -eq $Null | Should Be $False
+Add-Type -AssemblyName System.Drawing
+Describe 'PSSA Standard Rules' {
+	$Scripts = Get-ChildItem $Path -Include *.ps1, *.psm1, *.psd1 -Recurse
+	ForEach ($Script in $Scripts) {
+		Context "$($Script.Name)" {
+            $PSSAProps = @{
+                'Path' = $($Script.FullName)
+            }
+            If(Test-Path -Path "$PSScriptRoot\PSScriptAnalyzerSettings.psd1") {
+                $PSSAProps.Add('Settings',"$PSScriptRoot\PSScriptAnalyzerSettings.psd1")
+            }
+			$Analysis = Invoke-ScriptAnalyzer @PSSAProps
+			$ScriptAnalyzerRules = Get-ScriptAnalyzerRule
+			ForEach ($Rule in $ScriptAnalyzerRules) {
+				It "Should pass $Rule" {
+					If ($Analysis.RuleName -contains $Rule) {
+						$Analysis |	Where-Object RuleName -EQ $Rule -OutVariable Failures | Out-Default
+						$Failures.Count | Should Be 0
+					}
+				}
+			}
 		}
 	}
 }
@@ -62,7 +79,7 @@ Describe 'Module Information' {
         }
 
         It 'Required Modules' {
-            $Script:Manifest.RequiredModules | Should Not BeNullOrEmpty
+            $Script:Manifest.RequiredModules | Should BeNullOrEmpty
         }
     }
 
@@ -85,10 +102,11 @@ Get-Command -Module $ModuleName | ForEach-Object {
             It 'Description' {
                 Get-Help $_ | Select-Object -ExpandProperty Description | should not benullorempty
             }
-            #It 'Examples' {
-            #    $Examples = Get-Help $_ | Select-Object -ExpandProperty Examples | Measure-Object
-            #    $Examples.Count -gt 0 | Should be $true
-            #}
+            It 'Examples' {
+                $Examples = Get-Help $_ | Select-Object -ExpandProperty Examples | Measure-Object
+                $Examples.Count -gt 0 | Should be $true
+            }
         }
     }
 }
+
