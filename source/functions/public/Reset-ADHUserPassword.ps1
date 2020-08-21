@@ -1,24 +1,4 @@
-Function Reset-ADUserPassword {
-    <#
-    .SYNOPSIS
-    Resets an AD User password.
-
-    .DESCRIPTION
-    Resets an AD User password.
-
-    .PARAMETER UserName
-    SAMAccountName of the account to reset.
-
-    .PARAMETER ForceChangePasswordAtLogon
-    Using this switch will prompt the user to change their password at first logon.
-
-    .EXAMPLE
-    PS:\> Reset-ADUserPassword -UserName janed
-    Enter user's New Password [Leave Blank to EXIT]: ********
-    Re-Enter user's New Password: ********
-
-    This example resets the password for janed. Running this function will prompt to enter and re-enter password.
-    #>
+Function Reset-ADHUserPassword {
     [CmdletBinding(SupportsShouldProcess)]
     Param (
         [Parameter(Mandatory=$True,Position=1)][string]$UserName,

@@ -1,29 +1,20 @@
-Function Show-ADUser {
-	<#
-	.SYNOPSIS
-	Shows ADUser Information.
-
-	.DESCRIPTION
-	Collects and displays certain information for an ADUser.
-
-	.PARAMETER UserName
-	SAMAccountName of the ADUser
-
-	.EXAMPLE
-	PS C:\> Show-ADUser -UserName janed
-
-	This example gathers information about janed's account and displays it to the console.
-	This function has an alias of 'sadu' so an alternate way of write this command is:
-
-	PS C:\> sadu janed
-	#>
+Function Show-ADHUser {
 	[CmdletBinding()]
 	Param (
-		[Parameter(Mandatory=$True, Position=1)][string]$UserName
+		[Parameter(Mandatory=$True, Position=1)]
+		[string]$UserName,
+
+		[Parameter(Mandatory=$False)]
+		[string]$Server = $(Get-ADHServerValue)
 	)
 
 	Write-Verbose "[$UserName] Gathering Information"
-	$ObjUser = Get-ADUser -Filter {samAccountName -eq $UserName} -Properties *
+	$Params1 = @{
+		'Filter' = {samAccountName -eq $UserName}
+		'Propertis' = '*'
+	}
+	If ($Server -ne "") {{$Params1.Add('Server',$Server)}}
+	$ObjUser = Get-ADUser @Params1
 
 	If ($Null -eq $ObjUser) {
 		Write-Warning "[$UserName] Does Not Exist"

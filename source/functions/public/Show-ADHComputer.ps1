@@ -1,27 +1,21 @@
-Function Show-ADComputer {
-    <#
-    .SYNOPSIS
-        Shows ADComputer Information
-    .DESCRIPTION
-        Collects information about the computer object including LAPS and BitLocker information.
-        Will also perform a simple online/offline check.
-    .PARAMETER ComputerName
-        Name of the computer to return data for.
-    .EXAMPLE
-        PS C:\> Show-ADComputer -ComputerName computer1
-        PS C:\> Show-ADComputer computer1
-        PS C:\> sadc computer1
-
-        All 3 of these commands in this example will return information for a computer named 'computer1'
-    #>
+Function Show-ADHComputer {
     [CmdletBinding()]
     Param (
         [Parameter(Mandatory=$True,Position=0)]
-        [string]$ComputerName
+        [string]$ComputerName,
+
+        [Parameter(Mandatory=$False)]
+        [string]$Server = $(Get-ADHServerValue)
     )
 
     Try {
-        $Computer = Get-ADComputer -Identity $ComputerName -Properties * -ErrorAction STOP
+        $Params1 = @{
+            'Identity' = $ComputerName
+            'Properties' = '*'
+            'ErrorAction' = 'Stop'
+        }
+        If ($Server -ne "") {{$Params1.Add('Server',$Server)}}
+        $Computer = Get-ADComputer @Params1
         $Laps = Get-AdmPwdPassword -ComputerName $ComputerName
         $BitLocker = Get-BitlockerRecovery -Name $ComputerName | Sort-Object Date -Descending | Select-Object -First 1
         If (Test-Connection -ComputerName $ComputerName -Count 1 -Quiet) {

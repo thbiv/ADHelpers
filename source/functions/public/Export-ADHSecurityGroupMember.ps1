@@ -1,27 +1,25 @@
-Function Export-SecurityGroupMember {
-	<#
-	.SYNOPSIS
-	Exports security group members to an XLSX file alone with other information about the security group.
-
-	.DESCRIPTION
-	Exports security group members to an XLSX file alone with other information about the security group.
-
-	.PARAMETER Group
-	Name of the security group to be exported.
-
-	.EXAMPLE
-	PS C:\> Export-SecurityGroupMember -Group 'Domain Admins'
-
-	This example will take information from the Domain Admins security group and create an XLSX file with that data.
-	#>
+Function Export-ADHSecurityGroupMember {
 	[CmdletBinding()]
 	Param(
-		[Parameter(Mandatory=$True,Position=1)][string]$Group
+		[Parameter(Mandatory=$True,Position=1)]
+		[string]$Group,
+
+		[Parameter(Mandatory=$False)]
+		[string]$Server = $(Get-ADHServerValue)
 	)
 	Write-Verbose "[$Group] Getting group members"
-	$GroupMembers = Get-ADGroupMember $Group
+	$Params1 = @{
+		'Identity' = $Group
+	}
+	If ($Server -ne "") {{$Params1.Add('Server',$Server)}}
+	$GroupMembers = Get-ADGroupMember @Params1
 	Write-Verbose "[$Group] Geting properties"
-	$GroupObject = Get-ADGroup $Group -Properties *
+	$Params2 = @{
+		'Identity' = $Group
+		'Properties' = '*'
+	}
+	If ($Server -ne "") {{$Params2.Add('Server',$Server)}}
+	$GroupObject = Get-ADGroup @Params2
 	Write-Verbose "[$Group] Creating new Excel object"
 	$objExcel = New-Object -ComObject "Excel.Application"
 	Write-Verbose "[$Group] Creating Excel Workbook"
@@ -48,13 +46,17 @@ Function Export-SecurityGroupMember {
 	Write-Verbose "[$Group] Input members into worksheet"
 	ForEach ($Member in $GroupMembers) {
 		Write-Verbose "[$Group][$($Member.SAMAccountName)] Processing Member"
-		$EmailAddress = (Get-ADUser $($Member.SAMAccountName) -Properties EmailAddress | Select-Object EmailAddress).EmailAddress
-		$Title = (Get-ADUser $($Member.SAMAccountName) -Properties Title | Select-Object Title).Title
+		$Params3 = @{
+			'Identity' = $($Member.SAMAccountName)
+			'Properties' = 'EmailAddress','Title'
+		}
+		If ($Server -ne "") {{$Params3.Add('Server',$Server)}}
+		$UserData = Get-ADUser @Params3 | Select-Object EmailAddress,Title
 		$xCells.item($Row,1) = $Member.name
-		$xCells.item($Row,2) = $Title
+		$xCells.item($Row,2) = $UserData.Title
 		$xCells.item($Row,3) = $Member.SAMAccountName
-		$xCells.item($Row,4) = $EmailAddress
-		$Row = $Row + 1
+		$xCells.item($Row,4) = $UserData.EmailAddress
+		$Row++
 	}
 	Write-Verbose "[$Group] Auto sizing the columns"
 	$xWorkSheet.columns.item("A:C").EntireColumn.AutoFit() | Out-Null

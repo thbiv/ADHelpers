@@ -1,48 +1,23 @@
-Function Search-ADObject {
-	<#
-	.SYNOPSIS
-		Function for searching different AD Objects.
-
-	.DESCRIPTION
-		Function for searching different AD Objects. Will let you search user objects,
-		computer objects, security groups, and organizational units. You can only
-		search for one object type at a time.
-
-	.PARAMETER Search
-		Specifies the search string the function will use.
-
-	.PARAMETER User
-		Will list all user accounts that contain the search string.
-
-	.PARAMETER Computer
-		Will list all computer accounts that contain the search string.
-
-	.PARAMETER Group
-		Will list all security groups that contain the search string.
-
-	.PARAMETER OU
-		Will listall organizational units that contain the search string.
-
-	.EXAMPLE
-	PS C:\> Search-ADObject -Search jane -User
-
-	This example will search ActiveDirectory for any usernames that contain 'jane'.
-
-	.EXAMPLE
-	PS C:\> Search-ADObject -Search abcd -Computer
-
-	This example will search ActiveDirectory for any computernames that contain 'abcd'.
-
-	.NOTES
-		Written by Thomas Barratt
-	#>
+Function Search-ADHObject {
 	[CmdletBinding()]
 	Param (
-		[Parameter(Mandatory=$True, Position=0)][string]$Search,
-		[Parameter(Mandatory=$True, ParameterSetName="User")][switch]$User,
-		[Parameter(Mandatory=$True, ParameterSetName="Computer")][switch]$Computer,
-		[Parameter(Mandatory=$True, ParameterSetName="Group")][switch]$Group,
-		[Parameter(Mandatory=$True, ParameterSetName="OU")][switch]$OU
+		[Parameter(Mandatory=$True, Position=0)]
+		[string]$Search,
+
+		[Parameter(Mandatory=$False)]
+		[string]$Server = $(Get-ADHServerValue),
+
+		[Parameter(Mandatory=$True, ParameterSetName="User")]
+		[switch]$User,
+
+		[Parameter(Mandatory=$True, ParameterSetName="Computer")]
+		[switch]$Computer,
+
+		[Parameter(Mandatory=$True, ParameterSetName="Group")]
+		[switch]$Group,
+
+		[Parameter(Mandatory=$True, ParameterSetName="OU")]
+		[switch]$OU
 	)
 	Write-Verbose "[$Search] Search Start"
 	If ($User) {
@@ -51,6 +26,7 @@ Function Search-ADObject {
 			LDAPFilter = "(SamAccountName=*$Search*)"
 			Properties = '*'
 		}
+		If ($Server -ne "") {$ADUParameters.Add('Server',$Server)}
 		$objUser = @()
 		ForEach ($obj in (Get-ADUser @ADUParameters)) {
 			$OneObj = New-Object PSObject
@@ -70,6 +46,7 @@ Function Search-ADObject {
 			LDAPFilter = "(SamAccountName=*$Search*)"
 			Properties = '*'
 		}
+		If ($Server -ne "") {$ADCParameters.Add('Server',$Server)}
 		$objComputer = @()
 		ForEach ($obj in (Get-ADComputer @ADCParameters)) {
 			$OneObj = New-Object PSObject
@@ -88,6 +65,7 @@ Function Search-ADObject {
 			LDAPFilter = "(name=*$Search*)"
 			Properties = '*'
 		}
+		If ($Server -ne "") {$ADGParameters.Add('Server',$Server)}
 		$objGroup = @()
 		ForEach ($obj in (Get-ADGroup @ADGParameters)) {
 			$OneObj = New-Object PSObject
@@ -104,6 +82,7 @@ Function Search-ADObject {
 		$ADOUParameters = @{
 			LDAPFilter = "(name=*$Search*)"
 		}
+		If ($Server -ne "") {$ADOUParameters.Add('Server',$Server)}
 		$objOU = @()
 		ForEach ($obj in (Get-ADOrganizationalUnit @ADOUParameters)) {
 			$OneObj = New-Object PSObject
