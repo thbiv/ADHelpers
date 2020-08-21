@@ -1,12 +1,12 @@
-Function Get-ADHServerValue {
-    If ($ADH_Server) {
-        $Output = $ADH_Server
+Function Get-ADHTermOutputPathValue {
+    If ($ADH_TermOutputPath) {
+        $Output = $ADH_TermOutputPath
     } Else {
         $ConfigPath = $(Get-ADHConfigPath)
         If (Test-Path -Path $ConfigPath) {
             $Config = Import-PowerShellDataFile -Path $ConfigPath
-            If ($Config.Server) {
-                $Output = $Config.Server
+            If ($Config.TermOutputPath) {
+                $Output = $Config.TermOutputPath
             } Else {
                 $Output = ""
             }
