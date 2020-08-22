@@ -72,7 +72,61 @@ ADHelpers has not been released to PSGallery yet.
 
 ## Configuring Default Parameter Values
 
+Some parameters support 2 ways of configuring their default values making using the functions a little quicker and easier without having to type out the parameters you need all the time.
 
+When a function is executed and a supported parameter was not used, the function will check to see if a specific variable exists in the current powershell session. If it finds that variable, the value of that variable will be used as the value of the parameter.
+
+If no variable exists, the function will check if there is a powershell data file exists at the following path.
+
+```
+$Home\Documents\ADHelpers\ADHelpers.Config.psd1
+```
+
+The function will check if a specific configuration is present in the file. If there is, the function will use that value as the value of the parameter.
+
+The order in which the functions will check for parameter values are:
+
+1.  Using the parameter in command execution
+1.  Variable
+1.  Config file
+
+### Supported Parameters
+
+#### Server 
+
+-   Functions: Clear-ADHHomeFolder, Export-ADHSecurityGroupMember, Export-ADHUserSecurityGroup, Search-ADHObject, Show-ADHComputer, Show-ADHUser
+-   Variable Name: ADH_Server
+-   Configuration file setting name: Server
+
+#### OutputPath
+
+-   Functions: Export-ADHUserSecurityGroup
+-   Variable Name: ADH_TermOutputPath
+-   Configuration file setting name: TermOutputPath
+
+### Using Variables
+
+Using variables to configure default parameter values is as simple as defining the variable.
+
+```Powershell
+$ADH_Server = 'server01'
+```
+
+Best practice here would be to set the variables in your profile so you won't need to worry about it again.
+
+### Using Config File
+
+To use the config file method of configuring default parameter values, first create a folder named ```ADHelpers``` in your ```Documents``` folder. Then create a file in that folder named ```ADHelpers.Config.psd1```. Populate the file with the configuration settings like any other PSD1 file.
+
+Here is an example
+
+```Powershell
+# Example ADHekpers.Config.psd1
+@{
+    Server = 'Server01'
+    TermOutputPath = "Server02\path\to\folder"
+}
+```
 
 ---
 
